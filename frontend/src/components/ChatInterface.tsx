@@ -328,7 +328,15 @@ export function ChatInterface({ onNodeHighlight }: Props) {
     if (customerId) suggestions.push(`Show top billed products for customer ${customerId}`);
     if (productId) suggestions.push(`Show billing documents for product ${productId}`);
 
-    return suggestions.slice(0, 3);
+    const seen = new Set<string>();
+    const unique: string[] = [];
+    for (const s of suggestions) {
+      const key = normalizeQuery(s);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      unique.push(s);
+    }
+    return unique.slice(0, 3);
   };
 
   const normalizeQuery = (q: string) => q.trim().toLowerCase();
