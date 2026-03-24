@@ -378,7 +378,7 @@ export function ChatInterface({ onNodeHighlight }: Props) {
       seen.add(key);
       return true;
     });
-    if (filtered.length > 0) return filtered;
+    if (filtered.length > 0) return filtered.slice(0, 1);
     // Fallback: keep at least one relevant suggestion for clarity
     const fallback = items.filter(s => !recentUserQueries.includes(normalizeQuery(s)));
     return fallback.length > 0 ? fallback.slice(0, 1) : items.slice(0, 1);
@@ -789,7 +789,7 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                   {/* Follow-up suggestions */}
                   {followups.length > 0 && (
                     <div className="mt-2">
-                      <div className="text-[10px] uppercase tracking-widest text-white/25 mb-1">Suggested follow ups</div>
+                      <div className="text-[10px] uppercase tracking-widest text-white/25 mb-1">Next best step</div>
                       <div className="flex flex-wrap gap-2">
                         {followups.map(s => (
                           <button
