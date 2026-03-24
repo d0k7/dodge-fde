@@ -17,6 +17,13 @@ const SUGGESTIONS = [
   "Which countries have the highest billed value?",
 ];
 
+const THINKING_STEPS = [
+  'Reading your question',
+  'Finding related records',
+  'Checking the graph flow',
+  'Summarizing the answer',
+];
+
 let _id = 0;
 const uid = () => `m${++_id}`;
 
@@ -35,6 +42,7 @@ export function ChatInterface({ onNodeHighlight }: Props) {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [insightMode, setInsightMode] = useState<'simple' | 'standard' | 'analyst'>('standard');
   const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const [thinkingIdx, setThinkingIdx] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const autoFollowedRef = useRef<Set<string>>(new Set());
@@ -42,6 +50,15 @@ export function ChatInterface({ onNodeHighlight }: Props) {
   const recentAssistantAnswersRef = useRef<string[]>([]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  useEffect(() => {
+    if (!loading) return;
+    setThinkingIdx(0);
+    const t = setInterval(() => {
+      setThinkingIdx(i => (i + 1) % THINKING_STEPS.length);
+    }, 900);
+    return () => clearInterval(t);
+  }, [loading]);
 
   useEffect(() => {
     api.getSummary()
@@ -800,11 +817,16 @@ export function ChatInterface({ onNodeHighlight }: Props) {
             <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
               <span className="text-white text-[10px] font-bold">D</span>
             </div>
-            <div className="flex items-center gap-1 pt-2">
-              {[0,1,2].map(i => (
-                <div key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400/60 animate-bounce"
-                  style={{ animationDelay: `${i * 120}ms` }} />
-              ))}
+            <div className="flex flex-col gap-1 pt-1">
+              <div className="flex items-center gap-1">
+                {[0,1,2].map(i => (
+                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400/60 animate-bounce"
+                    style={{ animationDelay: `${i * 120}ms` }} />
+                ))}
+              </div>
+              <div className="text-[11px] text-white/40">
+                {THINKING_STEPS[thinkingIdx]}
+              </div>
             </div>
           </div>
         )}
