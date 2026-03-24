@@ -325,12 +325,12 @@ export function ChatInterface({ onNodeHighlight }: Props) {
       .map(m => normalizeQuery(m.content));
     const recentSuggestions = messages
       .filter(m => m.role === 'assistant')
-      .slice(-4)
+      .slice(-3)
       .flatMap(m => buildFollowUps(m))
       .map(normalizeQuery);
 
     const seen = new Set<string>();
-    return items.filter(s => {
+    const filtered = items.filter(s => {
       const key = normalizeQuery(s);
       if (seen.has(key)) return false;
       if (recentUserQueries.includes(key)) return false;
@@ -338,6 +338,10 @@ export function ChatInterface({ onNodeHighlight }: Props) {
       seen.add(key);
       return true;
     });
+    if (filtered.length > 0) return filtered;
+    // Fallback: keep at least one relevant suggestion for clarity
+    const fallback = items.filter(s => !recentUserQueries.includes(normalizeQuery(s)));
+    return fallback.length > 0 ? fallback.slice(0, 1) : items.slice(0, 1);
   };
 
   return (
