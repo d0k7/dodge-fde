@@ -365,3 +365,7 @@ dodge-fde/
 ## AI Coding Note
 
 Initial project scaffold (FastAPI structure, graph builder skeleton, React component shell) was generated with Claude. All further implementation including bug fixes, deterministic query logic, structured answer format, UI animations, analytics panel, tests, and guardrails was developed iteratively with AI assistance. Full session logs are in `ai-logs/`.
+
+© Dheeraj Mishra d0k7/https://github.com/d0k7
+
+? Dheeraj Mishra d0k7/https://github.com/d0k7
