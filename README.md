@@ -1,7 +1,7 @@
 # Dodge AI FDE Assignment
 ## Graph-Based Order-to-Cash (O2C) Context Graph + LLM Query Interface
 
-**Live Demo:** _[Add Vercel URL after deployment]_  
+**Live Demo:** https://dodge-fde-eight.vercel.app/  
 **GitHub:** https://github.com/d0k7/dodge-fde  
 **Submitted by:** Dheeraj Mishra
 
