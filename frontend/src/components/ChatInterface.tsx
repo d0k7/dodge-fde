@@ -316,6 +316,30 @@ export function ChatInterface({ onNodeHighlight }: Props) {
     return suggestions.slice(0, 3);
   };
 
+  const normalizeQuery = (q: string) => q.trim().toLowerCase();
+
+  const filterFollowUps = (items: string[]) => {
+    const recentUserQueries = messages
+      .filter(m => m.role === 'user')
+      .slice(-6)
+      .map(m => normalizeQuery(m.content));
+    const recentSuggestions = messages
+      .filter(m => m.role === 'assistant')
+      .slice(-4)
+      .flatMap(m => buildFollowUps(m))
+      .map(normalizeQuery);
+
+    const seen = new Set<string>();
+    return items.filter(s => {
+      const key = normalizeQuery(s);
+      if (seen.has(key)) return false;
+      if (recentUserQueries.includes(key)) return false;
+      if (recentSuggestions.includes(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
   return (
     <div className="flex flex-col h-full" style={{ fontFamily: "'Inter', sans-serif" }}>
 
@@ -522,7 +546,7 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                 {(() => {
-                  const followups = buildFollowUps(msg);
+                  const followups = filterFollowUps(buildFollowUps(msg));
                   const results = msg.results ?? [];
                   return (
                     <>
