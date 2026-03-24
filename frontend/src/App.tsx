@@ -132,7 +132,6 @@ export default function App() {
               data={graphData}
               highlightedNodes={highlightedNodes}
               onNodeClick={handleNodeClick}
-              onExpandNeighbors={handleExpandNeighbors}
               isLoading={isGraphLoading}
             />
           )}

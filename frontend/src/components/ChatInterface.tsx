@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Send, Code2, ChevronDown, ChevronUp, AlertTriangle, Sparkles, Database, MessageCircle, BarChart3, Lightbulb, Layers, Copy, BookOpen, ListChecks, Gauge } from 'lucide-react';
 import { api } from '../api/client';
 import type { ChatMessage, AnalyticsSummary } from '../types';
@@ -522,6 +523,7 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                 <div className="flex-1 min-w-0">
                 {(() => {
                   const followups = buildFollowUps(msg);
+                  const results = msg.results ?? [];
                   return (
                     <>
                   <div className="flex items-center gap-2 mb-1.5">
@@ -646,12 +648,12 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                   )}
 
                   {/* Evidence table */}
-                  {msg.results && msg.results.length > 0 && expandedEvidence[msg.id] && (
+                  {results.length > 0 && expandedEvidence[msg.id] && (
                     <div className="mt-2 rounded-xl border border-white/[0.08] bg-white/[0.03] p-2 overflow-x-auto">
                       <table className="min-w-full text-[11px] text-white/70">
                         <thead>
                           <tr className="text-white/40">
-                            {Object.keys(msg.results[0]).map((k) => (
+                            {Object.keys(results[0]).map((k) => (
                               <th key={k} className="text-left px-2 py-1 font-semibold">
                                 {k}
                               </th>
@@ -659,9 +661,9 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                           </tr>
                         </thead>
                         <tbody>
-                          {msg.results.slice(0, 5).map((row, idx) => (
+                          {results.slice(0, 5).map((row, idx) => (
                             <tr key={idx} className="border-t border-white/[0.05]">
-                              {Object.keys(msg.results[0]).map((k) => (
+                              {Object.keys(results[0]).map((k) => (
                                 <td key={k} className="px-2 py-1">
                                   {formatValue((row as Record<string, unknown>)[k])}
                                 </td>
@@ -670,9 +672,9 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                           ))}
                         </tbody>
                       </table>
-                      {msg.results.length > 5 && (
+                      {results.length > 5 && (
                         <div className="text-[10px] text-white/30 px-2 pt-1">
-                          Showing 5 of {msg.results.length} rows.
+                          Showing 5 of {results.length} rows.
                         </div>
                       )}
                     </div>

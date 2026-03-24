@@ -1,4 +1,4 @@
-import type { GraphData, GraphStats, NodeDetail, ChatMessage, AnalyticsSummary } from '../types';
+import type { GraphData, GraphStats, NodeDetail, AnalyticsSummary } from '../types';
 
 const BASE = import.meta.env.VITE_API_URL || '/api';
 
