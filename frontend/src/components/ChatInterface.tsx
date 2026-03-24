@@ -38,6 +38,8 @@ export function ChatInterface({ onNodeHighlight }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const autoFollowedRef = useRef<Set<string>>(new Set());
+  const suppressedFollowupsRef = useRef<Set<string>>(new Set());
+  const recentAssistantAnswersRef = useRef<string[]>([]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -95,8 +97,21 @@ export function ChatInterface({ onNodeHighlight }: Props) {
     const history = messages.slice(-6).map(m => ({ role: m.role, content: m.content }));
     try {
       const res = await api.sendChat(preparedQuery, history);
+      const msgId = uid();
+      const normalizedAnswer = res.answer.replace(/\s+/g, ' ').trim().toLowerCase();
+      const recentAnswers = recentAssistantAnswersRef.current;
+      const isRepeatAnswer = recentAnswers.includes(normalizedAnswer);
+      const isTransformQuery = normalizedAnswer.length > 0 && (
+        displayQuery.toLowerCase().startsWith('explain this in very simple words') ||
+        displayQuery.toLowerCase().startsWith('give me 3 key takeaways')
+      );
+      if (isRepeatAnswer || isTransformQuery) {
+        suppressedFollowupsRef.current.add(msgId);
+      }
+      recentAssistantAnswersRef.current = [normalizedAnswer, ...recentAnswers].slice(0, 3);
+
       setMessages(p => [...p, {
-        id: uid(), role: 'assistant', content: res.answer,
+        id: msgId, role: 'assistant', content: res.answer,
         sql: res.sql, results: res.results,
         is_relevant: res.is_relevant, timestamp: new Date(),
       }]);
@@ -550,7 +565,9 @@ export function ChatInterface({ onNodeHighlight }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                 {(() => {
-                  const followups = filterFollowUps(buildFollowUps(msg));
+                  const followups = (msg.is_relevant === false || isSystemError(msg.content) || suppressedFollowupsRef.current.has(msg.id))
+                    ? []
+                    : filterFollowUps(buildFollowUps(msg));
                   const results = msg.results ?? [];
                   return (
                     <>
