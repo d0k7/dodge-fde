@@ -29,7 +29,7 @@ The assignment asked for:
 | README with architecture, DB choice, prompting, guardrails | ✅ | This file |
 | Working demo link | ✅ | Deploy to Render + Vercel (instructions below) |
 | Public GitHub repo | ✅ | Push and make public |
-| AI coding session logs | ✅ | See `ai-logs/` folder |
+| AI coding session logs | ✅ | See `ai-logs/` and `sessions/` |
 
 ---
 
@@ -144,7 +144,7 @@ payments_ar.accountingDocument              = journal_entry_items_ar.accountingD
 
 ## LLM Integration and Prompting Strategy
 
-**Provider:** Groq (`llama3-70b-8192`, configurable via `GROQ_MODEL` env var)  
+**Provider:** Groq (`llama-3.3-70b-versatile`, configurable via `GROQ_MODEL` env var)  
 **Why Groq:** 14,400 free requests/day, ~200 tokens/second, no credit card required.
 
 ### Query Pipeline
@@ -297,7 +297,7 @@ npm run test
 1. Connect GitHub repo to Render
 2. Root directory: `backend`
 3. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4. Environment variables: `GROQ_API_KEY`, `FRONTEND_URL`
+4. Environment variables: `GROQ_API_KEY`, `FRONTEND_URL` or `FRONTEND_URLS`
 
 **Frontend → Vercel (free):**
 1. Import GitHub repo
@@ -313,7 +313,7 @@ npm run test
 | Backend | FastAPI | 0.111 | Async, auto-docs, Pydantic |
 | Graph engine | NetworkX | 3.3 | In-memory, BFS/subgraph, zero infra |
 | Database | SQLite | Built-in | Zero setup, standard SQL, free hosting |
-| LLM | Groq / llama3-70b | Configurable | Fastest free tier |
+| LLM | Groq / llama-3.3-70b | Configurable | Fastest free tier |
 | Frontend | React + TypeScript | 18 / 5.2 | Type safety, component model |
 | Build tool | Vite | 5.3 | Fast HMR, ESM-native |
 | Graph viz | react-force-graph-2d | 1.25 | Canvas, handles 600+ nodes |
@@ -350,7 +350,9 @@ dodge-fde/
 │           ├── ChatInterface.tsx          # Chat, SQL reveal, answer cards
 │           └── NodeMetadataPanel.tsx      # Click-to-inspect node details
 └── ai-logs/
-    └── claude-session.md                  # AI coding session transcript
+    └── ai-session-final.md                # Combined AI coding session log
+└── sessions/
+    └── ai-session-final.md                # Same log for submission form
 ```
 
 ---
@@ -366,8 +368,7 @@ dodge-fde/
 
 ## AI Coding Note
 
-Initial project scaffold (FastAPI structure, graph builder skeleton, React component shell) was generated with Claude. All further implementation including bug fixes, deterministic query logic, structured answer format, UI animations, analytics panel, tests, and guardrails was developed iteratively with AI assistance. Full session logs are in `ai-logs/`.
+Initial project scaffold (FastAPI structure, graph builder skeleton, React component shell) was generated with Claude. All further implementation including bug fixes, deterministic query logic, structured answer format, UI animations, analytics panel, tests, and guardrails was developed iteratively with AI assistance. Full session logs are in `ai-logs/` and `sessions/`.
 
 © Dheeraj Mishra d0k7/https://github.com/d0k7
 
-? Dheeraj Mishra d0k7/https://github.com/d0k7
