@@ -148,7 +148,92 @@ OFF_TOPIC_REPLY = (
     "or products."
 )
 
+def _is_transform_prompt(query: str) -> bool:
+    q = query.strip().lower()
+    return q.startswith("explain this in very simple words") or q.startswith("give me 3 key takeaways")
+
+
+def _parse_structured_text(text: str) -> dict | None:
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    data: dict[str, str] = {}
+    for line in lines:
+        m = re.match(r"^(Answer|Evidence|Insight|Coverage):\s*(.*)$", line)
+        if not m:
+            continue
+        data[m.group(1).lower()] = m.group(2).strip()
+    if len(data) >= 2:
+        return data
+    return None
+
+
+def _extract_last_structured(history: list[dict] | None) -> dict | None:
+    if not history:
+        return None
+    for msg in reversed(history):
+        if msg.get("role") != "assistant":
+            continue
+        parsed = _parse_structured_text(str(msg.get("content", "")))
+        if parsed:
+            return parsed
+    return None
+
+
+def _build_simple_from_structured(structured: dict) -> str:
+    answer = structured.get("answer", "Here is a simple summary.")
+    evidence = structured.get("evidence", "No evidence available.")
+    insight = structured.get("insight", "This explains the main result.")
+    coverage = structured.get("coverage", "Coverage not available.")
+    return _build_structured(answer, evidence, insight, coverage)
+
+
+def _build_takeaways_from_structured(structured: dict) -> str:
+    answer = structured.get("answer", "")
+    evidence = structured.get("evidence", "")
+    insight = structured.get("insight", "")
+    coverage = structured.get("coverage", "")
+    takeaways = [t for t in [answer, evidence, insight] if t]
+    while len(takeaways) < 3:
+        if coverage:
+            takeaways.append(coverage)
+        else:
+            takeaways.append("No additional details available.")
+    takeaways_text = f"1) {takeaways[0]} 2) {takeaways[1]} 3) {takeaways[2]}"
+    coverage_lower = coverage.lower()
+    evidence_lower = evidence.lower()
+    if "no rows" in coverage_lower or "0 rows" in coverage_lower or "no records" in evidence_lower:
+        risk = "No data was found, so the conclusion may be incomplete or the ID could be wrong."
+    else:
+        risk = "This is based only on the current dataset, so missing records could change the conclusion."
+    return _build_structured(
+        f"Takeaways: {takeaways_text}",
+        f"Risk: {risk}",
+        "These summarize the result in simple words.",
+        coverage or "Coverage not available.",
+    )
+
+
 def chat(user_query: str, conversation_history: list[dict] | None = None) -> dict:
+    if _is_transform_prompt(user_query):
+        structured = _extract_last_structured(conversation_history)
+        if not structured:
+            return {
+                "answer": _build_structured(
+                    "Please ask a data question first.",
+                    "No prior result was found to summarize.",
+                    "Ask any Order-to-Cash question, then use Explain simply or Key takeaways.",
+                    "No rows found.",
+                ),
+                "sql": None,
+                "results": [],
+                "is_relevant": True,
+                "error": None,
+            }
+        if user_query.strip().lower().startswith("explain this in very simple words"):
+            answer = _build_simple_from_structured(structured)
+        else:
+            answer = _build_takeaways_from_structured(structured)
+        return {"answer": answer, "sql": None, "results": [], "is_relevant": True, "error": None}
+
     if is_likely_off_topic(user_query):
         return {"answer": OFF_TOPIC_REPLY, "sql": None, "results": [],
                 "is_relevant": False, "error": None}
