@@ -352,7 +352,7 @@ dodge-fde/
 └── ai-logs/
     └── ai-session-final.md                # Combined AI coding session log
 └── sessions/
-    └── ai-session-final.md                # Same log for submission form
+    └── ai-session-final.md                # Same log for Combined AI coding session log
 ```
 
 ---
