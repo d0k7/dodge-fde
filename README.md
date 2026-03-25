@@ -25,8 +25,8 @@ The assignment asked for:
 | Identify broken/incomplete flows | ✅ | Delivered-not-billed, billed-no-delivery, unbilled journals |
 | Guardrails for off-topic prompts | ✅ | Two-layer: keyword blocklist + LLM domain check |
 | README with architecture, DB choice, prompting, guardrails | ✅ | This file |
-| Working demo link | ⏳ | Deploy to Render + Vercel (instructions below) |
-| Public GitHub repo | ⏳ | Push and make public |
+| Working demo link | ✅ | Deploy to Render + Vercel (instructions below) |
+| Public GitHub repo | ✅ | Push and make public |
 | AI coding session logs | ✅ | See `ai-logs/` folder |
 
 ---
