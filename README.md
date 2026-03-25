@@ -26,7 +26,7 @@ The assignment asked for:
 | Trace full O2C flow for a billing document | ✅ | Deterministic trace: SO → Delivery → Invoice → Journal |
 | Identify broken/incomplete flows | ✅ | Delivered-not-billed, billed-no-delivery, unbilled journals |
 | Guardrails for off-topic prompts | ✅ | Two-layer: keyword blocklist + LLM domain check |
-| README with architecture, DB choice, prompting, guardrails | ✅ | This file |
+| README with architecture, DB choice, prompting, guardrails | ✅ | Refer README.md file |
 | Working demo link | ✅ | Deploy to Render + Vercel (instructions below) |
 | Public GitHub repo | ✅ | Push and make public |
 | AI coding session logs | ✅ | See `ai-logs/` and `sessions/` |
