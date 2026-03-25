@@ -52,18 +52,28 @@ _origins = [
     "http://localhost:5173",
     "http://localhost:3000",
 ]
-_frontend_url = os.getenv("FRONTEND_URL", "").strip()
-if _frontend_url:
-    _frontend_url = _frontend_url.rstrip("/")
-    _origins.append(_frontend_url)
+_frontend_urls = []
+_frontend_url_raw = os.getenv("FRONTEND_URL", "").strip()
+_frontend_urls_raw = os.getenv("FRONTEND_URLS", "").strip()
+for raw in (_frontend_url_raw, _frontend_urls_raw):
+    if not raw:
+        continue
+    for part in raw.split(","):
+        cleaned = part.strip().rstrip("/")
+        if cleaned:
+            _frontend_urls.append(cleaned)
+
+for url in _frontend_urls:
+    if url not in _origins:
+        _origins.append(url)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
     allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
