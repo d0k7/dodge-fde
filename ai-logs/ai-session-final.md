@@ -1,137 +1,67 @@
 # AI Session Logs - Claude plus Codex - Dodge AI FDE Assignment
 Tool: Claude and Codex
 Session dates: 22 March 2026 to 25 March 2026
-Project: Dodge AI Forward Deployed Engineer Take Home Assignment
+Project: Dodge AI FDE Assignment, SAP O2C Graph System
 Developer: Dheeraj Mishra, GitHub d0k7
 
 ## Claude AI Session Log
+Tool: Claude, Anthropic, claude.ai
 
 ### Session Overview
-This log covers the full Claude coding session for the Dodge AI FDE assignment. The session spanned multiple conversations and covered architecture design, full backend implementation, frontend implementation, bug fixing, and final README writing.
+Claude was used for initial system architecture, full backend implementation, frontend scaffold, and all major rewrites when the real dataset schema was confirmed. It also handled the final bug audit, CORS hardening, and README writing.
 
-### Prompt 1 - Project Kickoff
-User prompt paraphrased:
-Shared the full assignment document for a graph based O2C system with an LLM query interface, the role description for the FDE role at Dodge AI, and a project initiation prompt with FAANG plus quality standards. Asked to start building the assignment.
+### Architecture and Technology Decisions
+- Chose SQLite over PostgreSQL and Neo4j for zero infrastructure, standard SQL compatible with LLM generation, free on Render, and sufficient for 21,393 read only rows.
+- Chose NetworkX in memory DiGraph over a graph database because no server is required and BFS subgraph expansion is built in.
+- Chose Groq with Llama 3 70B for a fast free tier and stable SQL generation.
+- Chose react force graph 2d because it is canvas based and matches the reference UI.
 
-Claude reasoning:
-- Identified the core deliverable as JSONL dataset to SQLite to NetworkX graph to React visualization plus LLM chat.
-- Chose SQLite over PostgreSQL for zero infra, standard SQL for LLM generation, and free Render deployment.
-- Chose NetworkX over Neo4j because in memory traversal is sufficient for 600 plus nodes and needs no server.
-- Chose Groq over OpenAI for free tier and fast inference with Llama 3 70B for SQL generation.
-- Chose react force graph 2d to match the reference UI screenshots.
+### Backend
+- Designed and implemented FastAPI routes for graph, chat, node metadata, neighbor expansion, analytics summary, and health check.
+- Implemented JSONL ingestion in database.py with folder detection across 18 entity subfolders, line by line parsing, recursive flattening of nested SAP time objects, camelCase column preservation, and idempotent DROP and CREATE on startup.
+- Built NetworkX DiGraph in graph_builder.py using real SAP field names such as salesOrder, soldToParty, billingDocument, referenceSdDocument, referenceDocument, and accountingDocument, with cancellation exclusion.
+- Implemented NL to SQL pipeline in llm_service.py with full schema injection, explicit join guide, SQL generation at temperature 0.05, structured JSON output, self healing retry on SQL errors, and answer synthesis at temperature 0.2.
+- Implemented two layer guardrails with a keyword blocklist and an LLM domain classifier, plus SELECT only enforcement.
+- Fixed data loss where valid 0 and False values were converted to empty strings by replacing or with explicit None checks.
+- Fixed SQLite connection leak on SQL error path by closing the connection before retry.
+- Fixed CORS configuration by removing wildcard origins combined with allow_credentials and switching to explicit origin list from environment variables.
 
-Files generated:
-- C:\Users\dheer\Downloads\dodge-fde\backend\database.py
-- C:\Users\dheer\Downloads\dodge-fde\backend\graph_builder.py
-- C:\Users\dheer\Downloads\dodge-fde\backend\llm_service.py
-- C:\Users\dheer\Downloads\dodge-fde\backend\main.py
-- C:\Users\dheer\Downloads\dodge-fde\backend\requirements.txt
-- C:\Users\dheer\Downloads\dodge-fde\backend\.env.example
-- C:\Users\dheer\Downloads\dodge-fde\frontend\package.json
-- C:\Users\dheer\Downloads\dodge-fde\frontend\vite.config.ts
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\types\index.ts
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\api\client.ts
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\GraphVisualization.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\ChatInterface.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\NodeMetadataPanel.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\App.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\main.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\index.html
+### Frontend
+- Scaffolded React plus TypeScript plus Vite with typed API client and shared interfaces.
+- Built GraphVisualization.tsx with force directed canvas graph, degree based node sizing, per type ambient glow via radial gradients, highlighted path rendering, and fit to view on load and on result highlight.
+- Added finite coordinate guards on all canvas draw callbacks to prevent crashes during force simulation initialization.
+- Built ChatInterface.tsx with NL input, SQL reveal toggle, structured answer display, typing indicator, example query suggestions, and node highlight coordination.
+- Built NodeMetadataPanel.tsx with click to inspect overlay, full SAP field metadata, and predecessor and successor lists.
+- Applied dark premium UI with a #0A0B0F background, glass panels, indigo accents, subtle grid texture, and stats pills.
+- Fixed TypeScript types by adding Product and Payment to the GraphNode union.
+- Removed unused prop from GraphVisualization props to resolve TypeScript contract mismatch.
 
-Key architectural decisions:
-- SQLite for zero infra, LLM friendly SQL, free deployment, and fast queries for 21k rows.
-- NetworkX for in memory traversal and BFS subgraphs without a graph server.
-- Groq for free tier and speed, using Llama 3 70B for SQL generation.
-- react force graph 2d for visual parity with the reference screenshots.
+### Deployment Support
+- Configured Vite proxy for local development.
+- Documented Render deployment settings and environment variables.
+- Documented Vercel deployment settings and VITE_API_URL.
+- Added .env.example with required and optional variables.
 
-### Prompt 2 - Dataset Format Discovery plus Full Rewrite
-User prompt paraphrased:
-Shared the actual dataset schema. The dataset is JSONL in 18 subfolders under sap o2c data. Camel case field names and nested objects need flattening. The backend is running.
+### Documentation
+- Wrote full README covering assignment alignment, architecture, graph model, database choice, LLM pipeline, guardrails, example queries, deployment instructions, and tech stack table.
 
-Bug identified:
-Original database ingestion assumed CSV or Excel. Actual dataset is JSONL folders with camel case fields.
+### Notable Issues Resolved
+- JSONL dataset schema mismatch resolved by full rewrite to folder based JSONL ingestion.
+- Canvas non finite coordinate crash resolved by draw guards.
+- Tailwind CSS missing resolved by adding CDN script in index.html.
+- CORS wildcard with credentials resolved by explicit allow list.
 
-Claude reasoning:
-- Full rewrite of database ingestion for folder based JSONL parsing and recursive flattening.
-- Graph builder rewritten for real SAP field names and joins.
-- LLM prompt updated with explicit foreign key relationships.
-
-Files rewritten:
-- C:\Users\dheer\Downloads\dodge-fde\backend\database.py
-- C:\Users\dheer\Downloads\dodge-fde\backend\graph_builder.py
-- C:\Users\dheer\Downloads\dodge-fde\backend\llm_service.py
-
-Result after fix:
-Loaded 19 tables and built a graph with 633 nodes and 615 edges.
-
-### Prompt 3 - Frontend Files Not Showing
-User prompt:
-Vite template showing on localhost and no custom UI files present.
-
-Root cause:
-Custom frontend files were not created in the Vite project.
-
-Claude action:
-Generated all frontend files with correct destination paths.
-
-### Prompt 4 - UI Rendering Issue
-User prompt:
-Unstyled page and graph disappearing after load.
-
-Bugs:
-- Tailwind not installed.
-- Force graph drawing code used non finite node positions before layout stabilizes.
-
-Fixes:
-- Added Tailwind CDN script to C:\Users\dheer\Downloads\dodge-fde\frontend\index.html.
-- Added finite guards before canvas drawing.
-
-### Prompt 5 - Premium UI Redesign
-User prompt:
-Asked for FAANG plus quality UI.
-
-Claude design updates:
-- Dark theme with glass panels.
-- Degree based node sizing and glow effects.
-- Custom link rendering for highlighted paths.
-- Enhanced chat UI with typing dots.
-- Grid overlay and stats pills.
-- Improved node metadata panel formatting.
-
-Files updated:
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\App.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\GraphVisualization.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\ChatInterface.tsx
-- C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\NodeMetadataPanel.tsx
-
-### Prompt 6 - Canvas Non Finite Error After Redesign
-User prompt:
-createRadialGradient error due to non finite values.
-
-Fix:
-Reapplied finite guards for node and link drawing in C:\Users\dheer\Downloads\dodge-fde\frontend\src\components\GraphVisualization.tsx.
-
-### Prompt 7 - Codex Audit Fixes
-User prompt:
-Shared a Codex audit report and asked Claude to fix issues and write README.
-
-Fixes applied:
-- Preserve zero and false values in JSONL ingest in C:\Users\dheer\Downloads\dodge-fde\backend\database.py.
-- Close SQLite connection on SQL error in C:\Users\dheer\Downloads\dodge-fde\backend\llm_service.py.
-- Add Product, Plant, Payment types in C:\Users\dheer\Downloads\dodge-fde\frontend\src\types\index.ts.
-- Remove unused prop on GraphVisualization.
-- Fix CORS wildcard with credentials in C:\Users\dheer\Downloads\dodge-fde\backend\main.py.
-- Clean up LLM prompt alias assumption.
-- Fix encoding artifacts and hard coded counts in UI.
-
-### Prompt 8 - Final README
-User prompt:
-Asked for a README aligned to assignment requirements.
-
-Claude output:
-A full README with alignment table, architecture diagram, graph model table, LLM pipeline, guardrails, example queries, deployment instructions, and tech stack.
+### Session Stats
+| Metric | Value |
+| --- | --- |
+| Major iterations | 8 |
+| Files created | 16 |
+| Full rewrites | 2, database.py and graph_builder.py |
+| Bugs fixed | 8 |
+| UI redesigns | 1 |
 
 ## Codex AI Session Log
+Tool: Codex, OpenAI
 
 ### Session Overview
 Codex focused on stabilizing the running system, improving UX, hardening the NL to SQL pipeline, adding deterministic analytics, and supporting deployment to Render and Vercel. It also resolved critical runtime errors in the hosted environment.
@@ -143,13 +73,13 @@ Backend:
 - Added strict SQL safety checks and LLM retry flow for SQL errors.
 - Updated default Groq model to a supported version and made it configurable by environment.
 - Pinned httpx to resolve Groq client proxy errors on Render.
-- Added explicit CORS allow list plus Vercel origin regex and later expanded to allow preflight OPTIONS.
-- Added support for HEAD on health check so uptime monitors do not fail.
+- Expanded CORS handling to allow preflight OPTIONS and multiple frontend origins.
+- Enabled HEAD on health check endpoint to support uptime monitors.
 - Added runtime pin for Render using python 3.11.9.
 
 Frontend:
-- Added answer cards with Answer, Evidence, Insight, Coverage sections.
-- Added Explain simply and Key takeaways buttons.
+- Added Answer, Evidence, Insight, Coverage response cards.
+- Added Explain simply and Key takeaways actions.
 - Added copy report and show SQL actions.
 - Added follow up suggestions with dedupe and a single Next best step UX.
 - Added animated thinking indicator during LLM calls.
@@ -158,24 +88,25 @@ Frontend:
 
 Deployment:
 - Deployed backend to Render and frontend to Vercel.
-- Fixed CORS errors by aligning FRONTEND_URL and FRONTEND_URLS.
-- Documented environment variables and rebuild behavior.
+- Fixed CORS errors by aligning FRONTEND_URL and FRONTEND_URLS with Vercel domains.
 
 Repository hygiene:
-- Created root C:\Users\dheer\Downloads\dodge-fde\README.md and updated content for final submission.
+- Created C:\Users\dheer\Downloads\dodge-fde\README.md and updated it for final submission.
 - Added C:\Users\dheer\Downloads\dodge-fde\.gitignore.
-- Added AI logs folder for submission artifacts.
+- Created AI logs folder and combined session log.
 
 ### Notable Errors Resolved
-- Groq model decommission error by switching default model.
-- Render build failures from pandas on unsupported Python version by pinning runtime.
-- CORS preflight failures on Render by allowing OPTIONS and multiple frontend origins.
-- Uptime monitor 405 by enabling HEAD on health endpoint.
+- Groq model decommission error fixed by switching default model.
+- Render build failures fixed by pinning runtime.
+- CORS preflight failures fixed by allowing OPTIONS and multiple frontend origins.
+- Uptime monitor 405 fixed by enabling HEAD on health endpoint.
 
 ### Session Stats
-- Major iterations: 10 plus
-- Features added: 12 plus
-- Deployment issues resolved: 6
+| Metric | Value |
+| --- | --- |
+| Major iterations | 10 plus |
+| Features added | 12 plus |
+| Deployment issues resolved | 6 |
 
 ## Deliverable Files for Submission
 - C:\Users\dheer\Downloads\dodge-fde\ai-logs\ai-session-final.md
