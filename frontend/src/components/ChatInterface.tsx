@@ -105,7 +105,9 @@ export function ChatInterface({ onNodeHighlight }: Props) {
   const send = async (q?: string) => {
     const displayQuery = (q ?? input).trim();
     if (!displayQuery || loading) return;
-    const preparedQuery = prepareQuery(displayQuery);
+    const preparedQuery = isTransformPrompt(displayQuery)
+      ? displayQuery
+      : prepareQuery(displayQuery);
     if (onNodeHighlight) onNodeHighlight([]);
     setMessages(p => [...p, { id: uid(), role: 'user', content: displayQuery, timestamp: new Date() }]);
     setInput('');
@@ -118,11 +120,8 @@ export function ChatInterface({ onNodeHighlight }: Props) {
       const normalizedAnswer = res.answer.replace(/\s+/g, ' ').trim().toLowerCase();
       const recentAnswers = recentAssistantAnswersRef.current;
       const isRepeatAnswer = recentAnswers.includes(normalizedAnswer);
-      const isTransformQuery = normalizedAnswer.length > 0 && (
-        displayQuery.toLowerCase().startsWith('explain this in very simple words') ||
-        displayQuery.toLowerCase().startsWith('give me 3 key takeaways')
-      );
-      if (isRepeatAnswer || isTransformQuery) {
+      const isTransform = normalizedAnswer.length > 0 && isTransformPrompt(displayQuery);
+      if (isRepeatAnswer || isTransform) {
         suppressedFollowupsRef.current.add(msgId);
       }
       recentAssistantAnswersRef.current = [normalizedAnswer, ...recentAnswers].slice(0, 3);
@@ -200,12 +199,20 @@ export function ChatInterface({ onNodeHighlight }: Props) {
     return [answer, evidence, insight].filter(Boolean).join(' ');
   };
 
-  const buildFollowupPrompt = (prefix: string, msg: ChatMessage, limit = 420) => {
+  const buildFollowupPrompt = (prefix: string, msg: ChatMessage, limit = 320) => {
     const structured = getStructuredSummary(msg.content);
     const base = structured ?? msg.content;
     const trimmed = base.length > limit ? `${base.slice(0, limit)}...` : base;
     const full = `${prefix} ${trimmed}`.trim();
     return full.length > 500 ? full.slice(0, 500) : full;
+  };
+
+  const isTransformPrompt = (q: string) => {
+    const l = q.trim().toLowerCase();
+    return (
+      l.startsWith('explain this in very simple words') ||
+      l.startsWith('give me 3 key takeaways')
+    );
   };
 
   const copyStructured = async (structured: { label: string; text: string }[], id: string) => {
