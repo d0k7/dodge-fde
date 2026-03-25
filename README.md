@@ -28,7 +28,7 @@ The assignment asked for:
 | Guardrails for off-topic prompts | ✅ | Two-layer: keyword blocklist + LLM domain check |
 | README with architecture, DB choice, prompting, guardrails | ✅ | Refer README.md file |
 | Working demo link | ✅ | Deploy to Render + Vercel (instructions below) |
-| Public GitHub repo | ✅ | Push and make public |
+| Public GitHub repo | ✅ | https://github.com/d0k7/dodge-fde |
 | AI coding session logs | ✅ | See `ai-logs/` and `sessions/` |
 
 ---
